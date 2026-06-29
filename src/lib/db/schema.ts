@@ -17,7 +17,7 @@ export const movies = pgTable("movies", {
   releaseDate: varchar("release_date", { length: 10 }),
   voteAverage: decimal("vote_average", { precision: 3, scale: 1 }),
   voteCount: integer("vote_count").default(0),
-  popularity: decimal("popularity", { precision: 10, scale: 2 }).default(0),
+  popularity: decimal("popularity", { precision: 10, scale: 2 }).default("0"),
   genreIds: jsonb("genre_ids").$type<number[]>(),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),

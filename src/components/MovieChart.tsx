@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef } from "react";
-import * as echarts from "echcharts";
+import * as echarts from "echarts";
 
 interface MovieChartProps {
   data: Array<{ name: string; value: number }>;
