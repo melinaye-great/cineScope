@@ -1,53 +1,40 @@
 import {
   pgTable,
-  serial,
+  uuid,
   text,
-  varchar,
   integer,
-  decimal,
   timestamp,
-  jsonb,
+  date,
+  unique,
 } from "drizzle-orm/pg-core";
 
 export const movies = pgTable("movies", {
-  id: serial("id").primaryKey(),
-  title: varchar("title", { length: 255 }).notNull(),
-  overview: text("overview"),
-  posterPath: varchar("poster_path", { length: 500 }),
-  releaseDate: varchar("release_date", { length: 10 }),
-  voteAverage: decimal("vote_average", { precision: 3, scale: 1 }),
-  voteCount: integer("vote_count").default(0),
-  popularity: decimal("popularity", { precision: 10, scale: 2 }).default("0"),
-  genreIds: jsonb("genre_ids").$type<number[]>(),
+  id: uuid("id").defaultRandom().primaryKey(),
+  name: text("name").notNull(),
+  status: text("status").default("upcoming"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-export const genres = pgTable("genres", {
-  id: serial("id").primaryKey(),
-  name: varchar("name", { length: 100 }).notNull(),
-  tmdbId: integer("tmdb_id").unique(),
-});
-
-export const movieGenres = pgTable(
-  "movie_genres",
+export const wishData = pgTable(
+  "wish_data",
   {
-    id: serial("id").primaryKey(),
-    movieId: integer("movie_id")
-      .references(() => movies.id)
+    id: uuid("id").defaultRandom().primaryKey(),
+    movieId: uuid("movie_id")
+      .references(() => movies.id, { onDelete: "cascade" })
       .notNull(),
-    genreId: integer("genre_id")
-      .references(() => genres.id)
-      .notNull(),
+    platform: text("platform").notNull(),
+    wishCount: integer("wish_count").notNull(),
+    dailyIncrement: integer("daily_increment").default(0),
+    snapshotDate: date("snapshot_date").notNull(),
+    createdAt: timestamp("created_at").defaultNow(),
   },
   (table) => ({
-    movieGenreIdx: index("movie_genre_idx").on(table.movieId, table.genreId),
+    uniqueSnapshot: unique().on(table.movieId, table.platform, table.snapshotDate),
   })
 );
 
-import { index } from "drizzle-orm/pg-core";
-
 export type Movie = typeof movies.$inferSelect;
 export type NewMovie = typeof movies.$inferInsert;
-export type Genre = typeof genres.$inferSelect;
-export type NewGenre = typeof genres.$inferInsert;
+export type WishData = typeof wishData.$inferSelect;
+export type NewWishData = typeof wishData.$inferInsert;
